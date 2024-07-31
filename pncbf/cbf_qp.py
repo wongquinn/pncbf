@@ -1,6 +1,10 @@
 import gurobipy
 
 
+class CbfQpNoSolutionException(Exception):
+    ''' This exception is raised when the CBF QP has no solution. '''
+    pass
+
 class CbfQp():
     ''' This class represents the CBF quadratic program described by
         equation (5) of http://arxiv.org/abs/2310.15478. '''
@@ -12,6 +16,7 @@ class CbfQp():
         self.add_variables()
         self.add_constraints()
         self.add_objective()
+        self.model.update()
 
 
     def add_variables(self):
@@ -27,6 +32,7 @@ class CbfQp():
         # We set up a basic constraint here with u <= 0. This is a placeholder.
         # When we actually solve, we will set the LHS coefficient and RHS value.
         self.constr = self.model.addConstr(self.u <= 0)
+        pass
 
 
     def add_objective(self):
@@ -51,18 +57,21 @@ class CbfQp():
             We do not reset the model here so as to allow warm-starting. '''
         
         # Update the objective function given the nominal control input.
-        self.model.setObjective(gurobipy.norm(self.u - u_nominal, 2.0), gurobipy.GRB.MINIMIZE)
+        # We disregard the square root as this has no effect on the solution.
+        self.model.setObjective((self.u - u_nominal) @ (self.u - u_nominal), gurobipy.GRB.MINIMIZE)
 
         # Update the constraint given the Lie derivatives and RHS.
-        self.constr.setAttr(gurobipy.GRB.Attr.RHS, -alpha_bx - lie_deriv_f_bx)
-        self.model.chgCoeff(self.constr, self.u, lie_deriv_g_bx)
+        self.constr.setAttr(gurobipy.GRB.Attr.RHS, (-alpha_bx - lie_deriv_f_bx) / lie_deriv_g_bx)
 
         # Solve the model.
         self.model.update()
         self.model.optimize()
 
-        # Return the optimal control input.
-        return self.u.X
+        if self.model.status == gurobipy.GRB.OPTIMAL:
+            # Return the optimal control input.
+            return self.u.X
+        else:
+            raise CbfQpNoSolutionException("The CBF QP has no solution.")
 
 # Test the CBF QP.
 import numpy as np
