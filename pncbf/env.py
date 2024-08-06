@@ -1,32 +1,5 @@
 import numpy as np
-
-
-class State:
-    def __init__(self):
-        "Default state"
-        self.agent_pos = np.array([20.0, 20.0])
-        self.agent_vel = np.array([0.0, 0.0])
-
-        self.goal_pos = np.array([80.0, 80.0])
-        self.goal_vel = np.array([0.0, 0.0])
-
-        self.danger_pos = np.array([45.0, 55.0])
-        self.danger_vel = np.array([0.0, 0.0])
-        self.danger_radius = 15.0
-
-        self.total_dim = 12  # All the positions and velocities
-
-    def to_array(self):
-        return np.concatenate(
-            [
-                self.agent_pos,
-                self.agent_vel,
-                self.goal_pos,
-                self.goal_vel,
-                self.danger_pos,
-                self.danger_vel,
-            ]
-        )
+from pncbf.state import State
 
 
 class Environment:
@@ -47,18 +20,24 @@ class Environment:
         return self.h_scale * (1 - d**2) / (1 + d**2)
 
     def step(self):
-        action = self.policy(self.state)
-        self.state.agent_vel = self.process_action(action)
+        raw_action = self.policy(self.state)
+        action = self.process_action(raw_action)
+        self.state.agent_vel = action
 
         self.state.agent_pos += self.state.agent_vel
         self.state.goal_pos += self.state.goal_vel
         self.state.danger_pos += self.state.danger_vel
 
-        self.info = {"h": self.h(self.state)}
+        self.info = {
+            "h": self.h(self.state),
+            "raw_action": raw_action,
+            "action": action,
+        }
 
         return self.state, self.info
 
     def process_action(self, action):
+        """Process the action such as by applying actuation limits"""
         if np.linalg.norm(action) > self.max_agent_vel:
             action = action / np.linalg.norm(action) * self.max_agent_vel
 
@@ -67,4 +46,7 @@ class Environment:
     def reset(self):
         """Reset to default state"""
         self.state = State()
+        self.state.set_to_default()
+        self.state.randomize_agent(self.world_dims)
+
         self.info = {}

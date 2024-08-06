@@ -5,7 +5,7 @@ class Policy:
 
     def __call__(self, state):
         # Hand-crafted policy
-        base_command = 0.1 * (state.goal_pos - state.agent_pos)
+        base_action = 0.1 * (state.goal_pos - state.agent_pos)
 
-        modified_command = self.filter(state, base_command)
-        return modified_command
+        modified_action = self.filter(state, base_action)
+        return modified_action
