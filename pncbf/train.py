@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from matplotlib.colors import TwoSlopeNorm
 import numpy as np
 import torch
 import torch.nn as nn
@@ -138,7 +139,10 @@ def render_ncbf(args, model):
     # Reshape the output tensor to match the grid shape
     Z = outputs.reshape(size, size).detach().cpu().numpy()
 
-    contour = plt.gca().contourf(X, Y, Z, levels=levels, cmap="RdBu_r")
+    # Set h=0 to be the contour level 0
+    norm = TwoSlopeNorm(vmin=Z.min(), vcenter=0.0, vmax=Z.max())
+
+    contour = plt.gca().contourf(X, Y, Z, levels=levels, norm=norm, cmap="RdBu_r")
     plt.gcf().colorbar(contour, label="h")
 
     # Render the environment on top of the contour plot.
