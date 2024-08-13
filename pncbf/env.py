@@ -22,11 +22,7 @@ class Environment:
     def step(self):
         raw_action = self.policy(self.state)
         action = self.process_action(raw_action)
-        self.state.agent_vel = action
-
-        self.state.agent_pos += self.state.agent_vel
-        self.state.goal_pos += self.state.goal_vel
-        self.state.danger_pos += self.state.danger_vel
+        self.state += self.state_derivative(self.state, action)
 
         self.info = {
             "h": self.h(self.state),
@@ -42,6 +38,33 @@ class Environment:
             action = action / np.linalg.norm(action) * self.max_agent_vel
 
         return action
+    
+    def state_derivative(self, state, action):
+        """Calculate x_dot given the current state x and an action u"""
+        x_dot = State()
+        
+        x_dot.agent_pos = action
+        x_dot.agent_vel = np.zeros_like(state.goal_vel)
+        x_dot.goal_pos = state.goal_vel
+        x_dot.goal_vel = np.zeros_like(state.goal_vel)
+        x_dot.danger_pos = state.danger_vel
+        x_dot.danger_vel = np.zeros_like(state.danger_vel)
+        
+        return x_dot
+    
+    def get_affine_dynamics(self, state):
+        """Get the f and g matrices"""
+        f = np.zeros((12, 12))
+        g = np.zeros((12, 2))
+
+        # Derivative of the goal and agent positions are their velocities
+        f[2, 4:6] = state.goal_vel
+        f[4, 8:10] = state.danger_vel
+
+        # Derivative of the agent's velocity is the action
+        g[0, 0:2] = 1
+
+        return f, g
 
     def reset(self):
         """Reset to default state"""

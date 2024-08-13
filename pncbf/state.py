@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 
 
 class State:
@@ -14,9 +15,6 @@ class State:
         self.danger_radius = 15.0
 
         self.total_dim = 12  # All the positions and velocities
-        
-    def __repr__(self):
-        return f"State(agent_pos={self.agent_pos}, agent_vel={self.agent_vel}, goal_pos={self.goal_pos}, goal_vel={self.goal_vel}, danger_pos={self.danger_pos}, danger_vel={self.danger_vel}, danger_radius={self.danger_radius})"
 
     def to_array(self):
         return np.concatenate(
@@ -29,6 +27,9 @@ class State:
                 self.danger_vel,
             ]
         )
+
+    def to_tensor(self, device):
+        return torch.tensor(self.to_array(), dtype=torch.float32).to(device)
 
     def set_to_default(self):
         """Set the state passed in to the default"""
@@ -47,5 +48,18 @@ class State:
     def randomize_agent(self, bounds):
         """Randomize the agent's position and velocity"""
         self.agent_pos = np.random.uniform(bounds[0], bounds[1], 2)
+
+        return self
+
+    def __repr__(self):
+        return f"State(agent_pos={self.agent_pos}, agent_vel={self.agent_vel}, goal_pos={self.goal_pos}, goal_vel={self.goal_vel}, danger_pos={self.danger_pos}, danger_vel={self.danger_vel}, danger_radius={self.danger_radius})"
+
+    def __iadd__(self, other):
+        self.agent_pos += other.agent_pos
+        self.agent_vel += other.agent_vel
+        self.goal_pos += other.goal_pos
+        self.goal_vel += other.goal_vel
+        self.danger_pos += other.danger_pos
+        self.danger_vel += other.danger_vel
 
         return self
