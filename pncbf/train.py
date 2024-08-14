@@ -197,7 +197,8 @@ def collect_qp(args, model):
     Returns:
         np.ndarray: The collected QP data.
     """
-    policy = Policy(args, HandmadeFilter(args))
+    policy = Policy(args, QPFilter(args, ncbf_model))
+    # policy = Policy(args, HandmadeFilter(args))
     env = Environment(args, policy)
     r = NotebookRenderer(xlim=args.world_dims, enable_legend=True)
     state_dim = env.state.total_dim

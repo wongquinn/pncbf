@@ -73,3 +73,21 @@ class Environment:
         self.state.randomize_agent(self.world_dims)
 
         self.info = {}
+
+def get_affine_dynamics(state):
+    """Get the f and g matrices for a given state."""
+    f = np.zeros((12, 1))
+    g = np.zeros((12, 2))
+
+    # Derivative of the goal and agent positions are their velocities       
+    f[4:6, 0] = state.goal_vel
+    f[8:10, 0] = state.danger_vel
+
+    # Derivative of the agent's position is the action
+    g[0:2, 0:2] = np.eye(2)
+    
+    # The agent's velocity changes by the action minus the original value
+    f[2:4, 0] = -state.agent_vel
+    g[2:4, 0:2] = np.eye(2)
+
+    return f, g

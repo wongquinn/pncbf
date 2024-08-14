@@ -23,12 +23,18 @@ class HandmadeFilter:
 
 
 class QPFilter:
-    def __init__(self, args):
+    """A filter that finds a minimally-different safe action using QP."""
+    def __init__(self, args, model=None):
         self.args = args
-        self.ncbf = None
+        self.ncbf_model = model
 
-    def __call__(self, state, base_action):
-        pass
+    def __call__(self, state, nominal_action):
+        state_tensor = state.to_tensor(self.args.device)
+        grad = calculate_gradient(self.ncbf_model, state_tensor)
+        f, g = get_affine_dynamics(state)
+        b = self.ncbf_model(state_tensor).item()
+
+        return solve(grad, f, g, b, nominal_action)
 
 
 class NeuralFilter:
