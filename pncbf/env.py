@@ -51,26 +51,15 @@ class Environment:
         x_dot.danger_vel = np.zeros_like(state.danger_vel)
         
         return x_dot
-    
-    def get_affine_dynamics(self, state):
-        """Get the f and g matrices"""
-        f = np.zeros((12, 12))
-        g = np.zeros((12, 2))
 
-        # Derivative of the goal and agent positions are their velocities
-        f[2, 4:6] = state.goal_vel
-        f[4, 8:10] = state.danger_vel
-
-        # Derivative of the agent's velocity is the action
-        g[0, 0:2] = 1
-
-        return f, g
-
-    def reset(self):
+    def reset(self, agent_bounds=None):
         """Reset to default state"""
         self.state = State()
         self.state.set_to_default()
-        self.state.randomize_agent(self.world_dims)
+        if agent_bounds is None:
+            self.state.randomize_agent(self.world_dims)
+        else:
+            self.state.randomize_agent(agent_bounds)
 
         self.info = {}
 
