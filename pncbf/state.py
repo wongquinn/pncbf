@@ -3,6 +3,8 @@ import torch
 
 
 class State:
+    """A class for storing the state of the environment."""
+
     def __init__(self):
         self.agent_pos = np.array([20.0, 20.0])
         self.agent_vel = np.array([0.0, 0.0])
@@ -32,7 +34,7 @@ class State:
         return torch.tensor(self.to_array(), dtype=torch.float32).to(device)
 
     def set_to_default(self):
-        """Set the state passed in to the default"""
+        """Set the state passed in to the default."""
         self.agent_pos = np.array([20.0, 20.0])
         self.agent_vel = np.array([0.0, 0.0])
 
@@ -46,7 +48,7 @@ class State:
         return self
 
     def randomize_agent(self, bounds):
-        """Randomize the agent's position and velocity"""
+        """Randomize the agent's position."""
         self.agent_pos = np.random.uniform(bounds[0], bounds[1], 2)
 
         return self

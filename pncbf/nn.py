@@ -2,6 +2,8 @@ import torch.nn as nn
 
 
 class MLP(nn.Module):
+    """Basic multi-layer perceptron (MLP) model."""
+
     def __init__(self, input_dim, output_dim, hidden_dims, activation=nn.ReLU()):
         super(MLP, self).__init__()
         self.input_dim = input_dim

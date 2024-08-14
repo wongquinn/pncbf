@@ -3,6 +3,7 @@ from pncbf.state import State
 
 
 class Environment:
+    """A class that holds the environment state and dynamics."""
     def __init__(self, args, policy):
         self.args = args
         self.policy = policy
@@ -15,11 +16,12 @@ class Environment:
         self.info = {}
 
     def h(self, state):
-        # normalized distance from danger zone
+        """Normalized distance from danger zone."""
         d = np.linalg.norm(state.agent_pos - state.danger_pos) / state.danger_radius
         return self.h_scale * (1 - d**2) / (1 + d**2)
 
     def step(self):
+        """State transition function."""
         raw_action = self.policy(self.state)
         action = self.process_action(raw_action)
         self.state += self.state_derivative(self.state, action)

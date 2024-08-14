@@ -1,12 +1,11 @@
 import matplotlib.pyplot as plt
-from matplotlib.colors import TwoSlopeNorm
 import numpy as np
 import torch
 import torch.nn as nn
 from tqdm import tqdm
 
 from pncbf.env import Environment
-from pncbf.filter import HandmadeFilter, NeuralFilter
+from pncbf.filter import NeuralFilter, QPFilter
 from pncbf.nn import MLP
 from pncbf.policy import Policy
 from pncbf.renderer import NotebookRenderer
@@ -65,7 +64,7 @@ def collect_ncbf(args):
             state_dim + 1 + state_dim,
         )
     )
-    for i in range(args.rollouts):
+    for i in tqdm(range(args.rollouts)):
         # Prepare for rollout
         env.reset()
 
@@ -146,7 +145,7 @@ def train_ncbf(args, rollout_data):
     return model
 
 
-def test_ncbf(args, model):
+def test_ncbf(args, ncbf_model):
     """
     Render the NCBF model as a contour map with the default state.
 
@@ -174,7 +173,7 @@ def test_ncbf(args, model):
     inputs = torch.tensor(inputs, dtype=torch.float32).to(args.device)
 
     # Evaluate the model over every point in the grid
-    outputs = model(inputs)
+    outputs = ncbf_model(inputs)
 
     # Reshape the output tensor to match the grid shape
     Z = outputs.reshape(size, size).detach().cpu().numpy()
@@ -186,7 +185,7 @@ def test_ncbf(args, model):
     render_env(r, default_state)
 
 
-def collect_qp(args, model):
+def collect_qp(args, ncbf_model):
     """
     Collect data about the quadratic programming solution that minimally modifies the nominal policy while maintaining the descent condition.
 
@@ -211,7 +210,7 @@ def collect_qp(args, model):
             state_dim + 2,
         )
     )
-    for i in range(args.rollouts):
+    for i in tqdm(range(args.rollouts)):
         # Prepare for rollout
         env.reset()
 
@@ -297,7 +296,7 @@ def test_qp(args, qp_model):
 
     for i in range(args.rollouts):
         # Prepare for rollout
-        env.reset()
+        env.reset([0, 60]) # Test positions may intersect the danger zone
 
         for j in range(args.steps_per_rollout):
             state, info = env.step()
