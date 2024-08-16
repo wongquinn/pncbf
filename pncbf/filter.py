@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from pncbf.env import get_affine_dynamics
 from pncbf.utils import calculate_gradient
-from pncbf.qp_solver import solve
+from pncbf.qp_solver import Solver
 
 
 class NullFilter:
@@ -32,6 +32,7 @@ class QPFilter:
     def __init__(self, args, model=None):
         self.args = args
         self.ncbf_model = model
+        self.solver = Solver()
 
     def __call__(self, state, nominal_action):
         state_tensor = state.to_tensor(self.args.device)
@@ -39,7 +40,7 @@ class QPFilter:
         f, g = get_affine_dynamics(state)
         b = self.ncbf_model(state_tensor).item()
 
-        return solve(grad, f, g, b, nominal_action)
+        return self.solver.solve(grad, f, g, b, nominal_action)
 
 
 class NeuralFilter:
