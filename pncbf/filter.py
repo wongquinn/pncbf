@@ -7,6 +7,7 @@ from pncbf.qp_solver import Solver
 
 class NullFilter:
     """A filter that does not modify the nominal action."""
+
     def __init__(self, args):
         self.args = args
 
@@ -16,6 +17,7 @@ class NullFilter:
 
 class HandmadeFilter:
     """A filter that repels the agent from the danger zone."""
+
     def __init__(self, args):
         self.args = args
         self.k = 1000
@@ -29,6 +31,7 @@ class HandmadeFilter:
 
 class QPFilter:
     """A filter that finds a minimally-different safe action using QP."""
+
     def __init__(self, args, model=None):
         self.args = args
         self.ncbf_model = model
@@ -45,6 +48,7 @@ class QPFilter:
 
 class NeuralFilter:
     """A filter that passes the nominal action through an NN."""
+
     def __init__(self, args, model=None):
         self.args = args
         self.qp_model = model

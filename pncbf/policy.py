@@ -1,6 +1,6 @@
 class Policy:
     """A class that holds the nominal policy and the filter."""
-    
+
     def __init__(self, args, filter):
         self.args = args
         self.filter = filter

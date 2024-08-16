@@ -4,6 +4,7 @@ from pncbf.state import State
 
 class Environment:
     """A class that holds the environment state and dynamics."""
+
     def __init__(self, args, policy):
         self.args = args
         self.policy = policy
@@ -40,18 +41,18 @@ class Environment:
             action = action / np.linalg.norm(action) * self.max_agent_vel
 
         return action
-    
+
     def state_derivative(self, state, action):
         """Calculate x_dot given the current state x and an action u"""
         x_dot = State()
-        
+
         x_dot.agent_pos = action
         x_dot.agent_vel = np.zeros_like(state.goal_vel)
         x_dot.goal_pos = state.goal_vel
         x_dot.goal_vel = np.zeros_like(state.goal_vel)
         x_dot.danger_pos = state.danger_vel
         x_dot.danger_vel = np.zeros_like(state.danger_vel)
-        
+
         return x_dot
 
     def reset(self, agent_bounds=None):
@@ -65,18 +66,19 @@ class Environment:
 
         self.info = {}
 
+
 def get_affine_dynamics(state):
     """Get the f and g matrices for a given state."""
     f = np.zeros((12, 1))
     g = np.zeros((12, 2))
 
-    # Derivative of the goal and agent positions are their velocities       
+    # Derivative of the goal and agent positions are their velocities
     f[4:6, 0] = state.goal_vel
     f[8:10, 0] = state.danger_vel
 
     # Derivative of the agent's position is the action
     g[0:2, 0:2] = np.eye(2)
-    
+
     # The agent's velocity changes by the action minus the original value
     f[2:4, 0] = -state.agent_vel
     g[2:4, 0:2] = np.eye(2)

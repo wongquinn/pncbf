@@ -38,7 +38,7 @@ class NotebookRenderer:
 
     def set_data(self, id, x, y, fmt="o", alpha=1, label=None):
         self.plot_dict[id] = (x, y, fmt, alpha, label)
-        
+
     def set_patch(self, id, artist):
         self.patch_dict[id] = artist
 
@@ -52,7 +52,7 @@ class NotebookRenderer:
         for id in self.plot_dict:
             x, y, fmt, alpha, label = self.plot_dict[id]
             plt.plot(x, y, fmt, alpha=alpha, label=label)
-            
+
         for id in self.patch_dict:
             artist = self.patch_dict[id]
             plt.gca().add_patch(artist)

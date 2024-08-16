@@ -296,7 +296,7 @@ def test_qp(args, qp_model):
 
     for i in range(args.rollouts):
         # Prepare for rollout
-        env.reset([0, 60]) # Test positions may intersect the danger zone
+        env.reset([0, 60])  # Test positions may intersect the danger zone
 
         for j in range(args.steps_per_rollout):
             state, info = env.step()
